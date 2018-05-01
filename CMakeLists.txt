@@ -6,13 +6,16 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCES
 	src/Tokenizer.cpp
+	src/TokenStream.cpp
 	src/Parser.cpp
 	src/Test.cpp
 )
 
 set(HEADERS
 	ext/catch.hpp
+	src/parse_error.hpp
 	src/Tokenizer.hpp
+	src/TokenStream.hpp
 	src/Parser.hpp
 )
 
