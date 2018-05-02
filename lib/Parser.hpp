@@ -55,8 +55,8 @@ struct Camera
 
 struct Light
 {
-	vec3 color;
 	vec3 position;
+	vec4 color;
 };
 
 struct Sphere

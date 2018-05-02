@@ -28,9 +28,17 @@ int main(int argc, char *argv[])
 
 	string Contents{istreambuf_iterator<char>(File), istreambuf_iterator<char>()}; // inefficient
 
-	TokenStream ts = Tokenizer::Tokenize(Contents);
 	Parser p;
-	p.Parse(ts);
+
+	try
+	{
+		TokenStream ts = Tokenizer::Tokenize(Contents);
+		p.Parse(ts);
+	}
+	catch (const std::exception & e)
+	{
+		cerr << "exception: " << e.what() << endl;
+	}
 
 	SceneInfo(p);
 

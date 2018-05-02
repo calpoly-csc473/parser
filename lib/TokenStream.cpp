@@ -1,8 +1,9 @@
 
 #include "TokenStream.hpp"
 #include "parse_error.hpp"
-#include <sstream>
 
+#include <sstream>
+#include <limits>
 using namespace std;
 
 
@@ -48,7 +49,18 @@ float TokenStream::pop_numeric()
 		throw parse_error("unexpected end-of-file");
 	}
 
-	return stof(Tokens[i ++]);
+	try
+	{
+		float value = stof(Tokens[i]);
+		i ++;
+		return value;
+	}
+	catch (const std::invalid_argument & e)
+	{
+		throw parse_error("expected number, found", Tokens[i]);
+	}
+
+	return numeric_limits<float>::max();
 }
 
 void TokenStream::require(string const & expectedToken)

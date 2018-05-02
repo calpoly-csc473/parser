@@ -13,4 +13,8 @@ public:
 	parse_error(const std::string & what_arg) : std::domain_error(what_arg) {}
 	parse_error(const char * what_arg) : std::domain_error(what_arg) {}
 
+	parse_error(const std::string & what, const std::string & expression)
+	: std::domain_error(what + " '" + expression + "'")
+	{}
+
 };

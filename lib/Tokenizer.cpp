@@ -37,7 +37,7 @@ vector<string> Tokenizer::Tokenize(const string & source)
 				tokenType = Token_None;
 			}
 		}
-		else if (isalpha(c))
+		else if (isalpha(c) || c == '_')
 		{
 			// If building a numeric token, end it
 			if (tokenType == Token_Numeric)
@@ -49,7 +49,7 @@ vector<string> Tokenizer::Tokenize(const string & source)
 			currentToken.push_back(c);
 			tokenType = Token_Alpha;
 		}
-		else if (isdigit(c) || c == '.')
+		else if (isdigit(c) || c == '.' || c == '-')
 		{
 			// If building an alpha token, end it
 			if (tokenType == Token_Alpha)
