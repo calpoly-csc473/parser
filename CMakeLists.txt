@@ -5,19 +5,30 @@ project(parser)
 set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCES
-	src/Tokenizer.cpp
-	src/TokenStream.cpp
-	src/Parser.cpp
-	src/Test.cpp
+	lib/Tokenizer.cpp
+	lib/TokenStream.cpp
+	lib/Parser.cpp
 )
 
 set(HEADERS
 	ext/catch.hpp
-	src/parse_error.hpp
-	src/Tokenizer.hpp
-	src/TokenStream.hpp
-	src/Parser.hpp
+	lib/parse_error.hpp
+	lib/Tokenizer.hpp
+	lib/TokenStream.hpp
+	lib/Parser.hpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-target_include_directories(${PROJECT_NAME} PUBLIC "ext/")
+add_library(parselib ${SOURCES} ${HEADERS})
+
+add_executable(parser src/Main.cpp)
+target_include_directories(parser PUBLIC "ext/")
+target_include_directories(parser PUBLIC "lib/")
+target_link_libraries(parser parselib)
+
+add_executable(unit_tests test/Tests.cpp)
+target_include_directories(unit_tests PUBLIC "ext/")
+target_include_directories(unit_tests PUBLIC "lib/")
+target_link_libraries(unit_tests parselib)
+
+enable_testing()
+add_test(test_all unit_tests)

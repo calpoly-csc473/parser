@@ -14,11 +14,11 @@ void Parser::Parse(TokenStream & tokens)
 
 		if (token == "camera")
 		{
-			ParseCamera(tokens);
+			camera = ParseCamera(tokens);
 		}
 		else if (token == "light_source")
 		{
-			ParseLightSource(tokens);
+			lights.push_back(ParseLightSource(tokens));
 		}
 		else if (token == "sphere")
 		{
@@ -93,10 +93,16 @@ Material Parser::ParseMaterial(TokenStream & tokens)
 
 Camera Parser::ParseCamera(TokenStream & tokens)
 {
+	Camera c = { 0 };
+
+	return c;
 }
 
 Light Parser::ParseLightSource(TokenStream & tokens)
 {
+	Light l = { 0 };
+
+	return l;
 }
 
 

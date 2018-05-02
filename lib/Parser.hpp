@@ -50,7 +50,7 @@ struct Attributes
 
 struct Camera
 {
-	vec3 up, right, look_at, center;
+	vec3 up, right, look_at, location;
 };
 
 struct Light
@@ -99,6 +99,9 @@ class Parser
 public:
 
 	void Parse(TokenStream & tokens);
+
+	Camera camera;
+	std::vector<Light> lights;
 
 	static vec3 ParseVector3(TokenStream & tokens);
 	static vec4 ParseVector4(TokenStream & tokens);
