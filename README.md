@@ -12,9 +12,9 @@ even if your parser has bugs.
 
 The easiest option is probably to copy the source files in [`lib/`](lib/) into your project,
 then take a look at [`src/Main.cpp`](src/Main.cpp) to see how to parse a file and access the relevant data.
-I would recommend using the structs defined in [`lib/Parse.hpp`](lib/Parse.hpp) to initialize your own Object classes.
+I would recommend using the structs defined in [`lib/Parse.hpp`](lib/Parser.hpp) to initialize your own Object classes.
 
-Alternatively, you could add some code in [`lib/Parse.cpp`](lib/Parse.cpp) to create instances of your Object class while parsing.
+Alternatively, you could add some code in [`lib/Parse.cpp`](lib/Parser.cpp) to create instances of your Object class while parsing.
 
 Regardless of what you do, it would probably be a good idea to remove the `vec3` and `vec4` classes and just include `glm.hpp`.
 I opted to use a simple struct just to avoid any dependencies.
