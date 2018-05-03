@@ -85,3 +85,11 @@ For more information, give this a read: [https://opensource.org/faq](https://ope
 The goal of this project is simplicity, not performance.
 And on a relatively slow CPU I found that it takes less than 2 seconds to parse every single `.pov` file from this class at once,
 so it's probably fast enough as is.
+
+---
+
+**Q:** Why are parsed Objects stored in this weird, pseudo-union data structure?
+
+**A:** For simplicity, and to make it clear that I think there should be a separation between
+the data structure used to store parsed scene information and the objects you use in your
+ray tracer implementation.
