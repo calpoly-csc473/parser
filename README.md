@@ -1,6 +1,8 @@
 
 # CSC 473 Pov-Ray Parser Implementation
 
+[![Build Status](https://travis-ci.org/calpoly-csc473/parser.svg?branch=master)](https://travis-ci.org/calpoly-csc473/parser)
+
 Sample parser for CSC 473 subset of Pov-Ray file format.
 
 You can feel free to use this in your projects.
