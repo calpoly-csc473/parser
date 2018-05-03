@@ -1,4 +1,8 @@
 
+// Copyright (C) 2018 Ian Dunn
+// For conditions of distribution and use, see the LICENSE file
+
+
 #pragma once
 
 #include <vector>
@@ -6,25 +10,26 @@
 
 #include "TokenStream.hpp"
 
+
 struct vec3
 {
-	float x, y, z;
+	float x = 0, y = 0, z = 0;
 };
 
 struct vec4
 {
-	float x, y, z, w;
+	float x = 0, y = 0, z = 0, w = 0;
 };
 
 struct Finish
 {
-	float ambient;
-	float diffuse;
-	float specular;
+	float ambient = -1;
+	float diffuse = -1;
+	float specular = -1;
 
-	float roughness;
-	float reflection;
-	float ior;
+	float roughness = -1;
+	float reflection = -1;
+	float ior = -1;
 };
 
 struct Transform
@@ -60,7 +65,7 @@ struct Object
 
 	Type type;
 	vec3 v1, v2, v3;
-	float s1, s2;
+	float s1 = 0, s2 = 0;
 	Attributes attributes;
 };
 
@@ -76,6 +81,11 @@ struct Light
 };
 
 
+/// Takes a TokenStream and parses the entire file, filling the
+/// camera, lights, and objects fields with the scene information.
+///
+/// Any malformed or unexpected contents in the .pov file is likely
+/// to throw an exception.
 class Parser
 {
 

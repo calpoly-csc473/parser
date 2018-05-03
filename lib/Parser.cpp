@@ -1,4 +1,8 @@
 
+// Copyright (C) 2018 Ian Dunn
+// For conditions of distribution and use, see the LICENSE file
+
+
 #include "Parser.hpp"
 #include "parse_error.hpp"
 #include <sstream>
@@ -78,7 +82,7 @@ vec4 Parser::ParseVector4(TokenStream & tokens)
 
 vec4 Parser::ParseColor(TokenStream & tokens)
 {
-	vec4 color = { 0 };
+	vec4 color;
 
 	tokens.require("color");
 	string type = tokens.pop();

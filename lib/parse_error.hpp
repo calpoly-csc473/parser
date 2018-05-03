@@ -1,9 +1,15 @@
 
+// Copyright (C) 2018 Ian Dunn
+// For conditions of distribution and use, see the LICENSE file
+
+
 #pragma once
 
 #include <stdexcept>
 
 
+/// Exception thrown by Parser and TokenStream when a parse-related error
+/// is encountered.
 class parse_error : public std::domain_error
 {
 

@@ -1,4 +1,8 @@
 
+// Copyright (C) 2018 Ian Dunn
+// For conditions of distribution and use, see the LICENSE file
+
+
 #include "Tokenizer.hpp"
 
 #include <cctype>
@@ -8,6 +12,10 @@ using namespace std;
 
 vector<string> Tokenizer::Tokenize(const string & source)
 {
+	// This could be made far more efficient by e.g. pre-allocating large blocks of chars
+	// and returning a vector of char* into this block.
+	// However, the goal of this software is simplicity, not efficiency.
+
 	vector<string> Result;
 
 	size_t i = 0;
@@ -29,7 +37,7 @@ vector<string> Tokenizer::Tokenize(const string & source)
 
 		if (isspace(c))
 		{
-			// skip whitespace, end current token
+			// Skip whitespace, end current token
 			if (currentToken.length() != 0)
 			{
 				Result.push_back(currentToken);
@@ -88,7 +96,7 @@ vector<string> Tokenizer::Tokenize(const string & source)
 		}
 		else
 		{
-			// non-printing character, end current token
+			// Non-printing character, end current token
 			if (currentToken.length() != 0)
 			{
 				Result.push_back(currentToken);
