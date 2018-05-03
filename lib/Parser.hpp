@@ -16,10 +16,8 @@ struct vec4
 	float x, y, z, w;
 };
 
-struct Material
+struct Finish
 {
-	vec4 color;
-
 	float ambient;
 	float diffuse;
 	float specular;
@@ -31,21 +29,39 @@ struct Material
 
 struct Transform
 {
-	vec3 quantity;
-
 	enum class Type
 	{
 		Translate,
 		Scale,
-		Rotation
+		Rotate
 	};
+
+	vec3 quantity;
 	Type type;
 };
 
 struct Attributes
 {
-	Material material;
+	vec4 pigment;
+	Finish finish;
 	std::vector<Transform> transforms;
+};
+
+struct Object
+{
+	enum class Type
+	{
+		Sphere,
+		Plane,
+		Triangle,
+		Box,
+		Cone
+	};
+
+	Type type;
+	vec3 v1, v2, v3;
+	float s1, s2;
+	Attributes attributes;
 };
 
 struct Camera
@@ -59,39 +75,6 @@ struct Light
 	vec4 color;
 };
 
-struct Sphere
-{
-	vec3 center;
-	float radius;
-	Attributes attributes;
-};
-
-struct Plane
-{
-	vec3 normal;
-	float distance;
-	Attributes attributes;
-};
-
-struct Triangle
-{
-	vec3 a, b, c;
-	Attributes attributes;
-};
-
-struct Box
-{
-	vec3 min, max;
-	Attributes attributes;
-};
-
-struct Cone
-{
-	vec3 min, max;
-	float r1, r2;
-	Attributes attributes;
-};
-
 
 class Parser
 {
@@ -102,22 +85,22 @@ public:
 
 	Camera camera;
 	std::vector<Light> lights;
+	std::vector<Object> objects;
 
 	static vec3 ParseVector3(TokenStream & tokens);
 	static vec4 ParseVector4(TokenStream & tokens);
 	static vec4 ParseColor(TokenStream & tokens);
 	static vec4 ParsePigment(TokenStream & tokens);
-	static Material ParseMaterial(TokenStream & tokens);
+	static Finish ParseFinish(TokenStream & tokens);
+	static Attributes ParseAttributes(TokenStream & tokens);
 
 	static Camera ParseCamera(TokenStream & tokens);
 	static Light ParseLightSource(TokenStream & tokens);
 
-	static Attributes ParseAttributes(TokenStream & tokens);
-
-	static Sphere ParseSphere(TokenStream & tokens);
-	static Plane ParsePlane(TokenStream & tokens);
-	static Triangle ParseTriangle(TokenStream & tokens);
-	static Box ParseBox(TokenStream & tokens);
-	static Cone ParseCone(TokenStream & tokens);
+	static Object ParseSphere(TokenStream & tokens);
+	static Object ParsePlane(TokenStream & tokens);
+	static Object ParseTriangle(TokenStream & tokens);
+	static Object ParseBox(TokenStream & tokens);
+	static Object ParseCone(TokenStream & tokens);
 
 };

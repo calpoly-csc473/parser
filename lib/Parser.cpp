@@ -22,23 +22,23 @@ void Parser::Parse(TokenStream & tokens)
 		}
 		else if (token == "sphere")
 		{
-			ParseSphere(tokens);
+			objects.push_back(ParseSphere(tokens));
 		}
 		else if (token == "triangle")
 		{
-			ParseTriangle(tokens);
+			objects.push_back(ParseTriangle(tokens));
 		}
 		else if (token == "box")
 		{
-			ParseBox(tokens);
+			objects.push_back(ParseBox(tokens));
 		}
 		else if (token == "cone")
 		{
-			ParseCone(tokens);
+			objects.push_back(ParseCone(tokens));
 		}
 		else if (token == "plane")
 		{
-			ParsePlane(tokens);
+			objects.push_back(ParsePlane(tokens));
 		}
 		else
 		{
@@ -104,10 +104,96 @@ vec4 Parser::ParseColor(TokenStream & tokens)
 
 vec4 Parser::ParsePigment(TokenStream & tokens)
 {
+	vec4 pigment;
+
+	tokens.require("{");
+	pigment = ParseColor(tokens);
+	tokens.require("}");
+
+	return pigment;
 }
 
-Material Parser::ParseMaterial(TokenStream & tokens)
+Finish Parser::ParseFinish(TokenStream & tokens)
 {
+	Finish f;
+
+	tokens.require("{");
+
+	while (! tokens.empty())
+	{
+		string token = tokens.pop();
+
+		if (token == "ambient")
+			f.ambient = tokens.pop_numeric();
+		else if (token == "diffuse")
+			f.diffuse = tokens.pop_numeric();
+		else if (token == "specular")
+			f.specular = tokens.pop_numeric();
+		else if (token == "roughness")
+			f.roughness = tokens.pop_numeric();
+		else if (token == "ior")
+			f.ior = tokens.pop_numeric();
+		else if (token == "reflection")
+			f.reflection = tokens.pop_numeric();
+		else if (token == "refraction")
+			tokens.pop_numeric();
+		else if (token == "}")
+			break;
+		else
+			throw parse_error("unexpected finish property", token);
+	}
+
+	return f;
+}
+
+Attributes Parser::ParseAttributes(TokenStream & tokens)
+{
+	Attributes a;
+
+	while (! tokens.empty())
+	{
+		string token = tokens.pop();
+
+		if (token == "pigment")
+		{
+			a.pigment = ParsePigment(tokens);
+		}
+		else if (token == "finish")
+		{
+			a.finish = ParseFinish(tokens);
+		}
+		else if (token == "translate")
+		{
+			Transform t;
+			t.quantity = ParseVector3(tokens);
+			t.type = Transform::Type::Translate;
+			a.transforms.push_back(t);
+		}
+		else if (token == "rotate")
+		{
+			Transform t;
+			t.quantity = ParseVector3(tokens);
+			t.type = Transform::Type::Rotate;
+			a.transforms.push_back(t);
+		}
+		else if (token == "scale")
+		{
+			Transform t;
+			t.quantity = ParseVector3(tokens);
+			t.type = Transform::Type::Scale;
+			a.transforms.push_back(t);
+		}
+		else if (token == "}")
+		{
+			break;
+		}
+		else
+		{
+			throw parse_error("unexpected object attribute", token);
+		}
+	}
+
+	return a;
 }
 
 
@@ -151,45 +237,79 @@ Light Parser::ParseLightSource(TokenStream & tokens)
 }
 
 
-Attributes Parser::ParseAttributes(TokenStream & tokens)
+Object Parser::ParseSphere(TokenStream & tokens)
 {
-	Attributes a;
+	Object s;
+	s.type = Object::Type::Sphere;
 
-	return a;
-}
+	tokens.require("{");
+	s.v1 = ParseVector3(tokens);
+	tokens.require(",");
+	s.s1 = tokens.pop_numeric();
 
-
-Sphere Parser::ParseSphere(TokenStream & tokens)
-{
-	Sphere s;
+	s.attributes = ParseAttributes(tokens);
 
 	return s;
 }
 
-Plane Parser::ParsePlane(TokenStream & tokens)
+Object Parser::ParsePlane(TokenStream & tokens)
 {
-	Plane p;
+	Object p;
+	p.type = Object::Type::Plane;
+
+	tokens.require("{");
+	p.v1 = ParseVector3(tokens);
+	tokens.require(",");
+	p.s1 = tokens.pop_numeric();
+
+	p.attributes = ParseAttributes(tokens);
 
 	return p;
 }
 
-Triangle Parser::ParseTriangle(TokenStream & tokens)
+Object Parser::ParseTriangle(TokenStream & tokens)
 {
-	Triangle t;
+	Object t;
+	t.type = Object::Type::Triangle;
+
+	tokens.require("{");
+	t.v1 = ParseVector3(tokens);
+	tokens.require(",");
+	t.v2 = ParseVector3(tokens);
+	tokens.require(",");
+	t.v3 = ParseVector3(tokens);
+
+	t.attributes = ParseAttributes(tokens);
 
 	return t;
 }
 
-Box Parser::ParseBox(TokenStream & tokens)
+Object Parser::ParseBox(TokenStream & tokens)
 {
-	Box b;
+	Object b;
+	b.type = Object::Type::Box;
+
+	tokens.require("{");
+	b.v1 = ParseVector3(tokens);
+	tokens.require(",");
+	b.v2 = ParseVector3(tokens);
 
 	return b;
 }
 
-Cone Parser::ParseCone(TokenStream & tokens)
+Object Parser::ParseCone(TokenStream & tokens)
 {
-	Cone c;
+	Object c;
+	c.type = Object::Type::Cone;
+
+	tokens.require("{");
+	c.v1 = ParseVector3(tokens);
+	tokens.require(",");
+	c.s1 = tokens.pop_numeric();
+	tokens.require(",");
+	c.v2 = ParseVector3(tokens);
+	tokens.require(",");
+	c.s2 = tokens.pop_numeric();
 
 	return c;
 }
