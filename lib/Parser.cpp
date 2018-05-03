@@ -294,6 +294,8 @@ Object Parser::ParseBox(TokenStream & tokens)
 	tokens.require(",");
 	b.v2 = ParseVector3(tokens);
 
+	b.attributes = ParseAttributes(tokens);
+
 	return b;
 }
 
@@ -310,6 +312,8 @@ Object Parser::ParseCone(TokenStream & tokens)
 	c.v2 = ParseVector3(tokens);
 	tokens.require(",");
 	c.s2 = tokens.pop_numeric();
+
+	c.attributes = ParseAttributes(tokens);
 
 	return c;
 }
