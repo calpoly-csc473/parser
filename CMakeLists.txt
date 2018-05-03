@@ -21,7 +21,6 @@ set(HEADERS
 add_library(parselib ${SOURCES} ${HEADERS})
 
 add_executable(parser src/Main.cpp)
-target_include_directories(parser PUBLIC "ext/")
 target_include_directories(parser PUBLIC "lib/")
 target_link_libraries(parser parselib)
 
