@@ -130,9 +130,9 @@ void SceneInfo(const Parser & p)
 			break;
 		}
 
-		if (o.attributes.pigment.w)
-			cout << "- Color: {" << o.attributes.pigment << "}" << endl;
-		else
+		// if (o.attributes.pigment.w)
+		// 	cout << "- Color: {" << o.attributes.pigment << "}" << endl;
+		// else
 			cout << "- Color: {" <<
 				o.attributes.pigment.x << " " <<
 				o.attributes.pigment.y << " " <<
