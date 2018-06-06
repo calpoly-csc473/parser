@@ -23,13 +23,13 @@ struct vec4
 
 struct Finish
 {
-	float ambient = -1;
-	float diffuse = -1;
-	float specular = -1;
+	float ambient = 0;
+	float diffuse = 0;
+	float specular = 0;
 
-	float roughness = -1;
-	float reflection = -1;
-	float ior = -1;
+	float roughness = 1;
+	float reflection = 0;
+	float ior = 1;
 };
 
 struct Transform
