@@ -10,109 +10,114 @@
 using namespace std;
 
 
-vector<string> Tokenizer::Tokenize(const string & source)
+namespace parser
 {
-	// This could be made far more efficient by e.g. pre-allocating large blocks of chars
-	// and returning a vector of char* into this block.
-	// However, the goal of this software is simplicity, not efficiency.
 
-	vector<string> Result;
-
-	size_t i = 0;
-	const size_t end = source.length();
-	string currentToken;
-
-	enum
+	vector<string> Tokenizer::Tokenize(const string & source)
 	{
-		Token_None = 0,
-		Token_Alpha = 1,
-		Token_Numeric = 2,
-	};
-	int tokenType = Token_None;
+		// This could be made far more efficient by e.g. pre-allocating large blocks of chars
+		// and returning a vector of char* into this block.
+		// However, the goal of this software is simplicity, not efficiency.
 
-	while (i < end)
-	{
-		const char c = source[i];
-		const char next = (i + 1 < end ? source[i+1] : '\0');
+		vector<string> Result;
 
-		if (isspace(c))
-		{
-			// Skip whitespace, end current token
-			if (currentToken.length() != 0)
-			{
-				Result.push_back(currentToken);
-				currentToken.clear();
-				tokenType = Token_None;
-			}
-		}
-		else if (isalpha(c) || c == '_')
-		{
-			// If building a numeric token, end it
-			if (tokenType == Token_Numeric)
-			{
-				Result.push_back(currentToken);
-				currentToken.clear();
-			}
+		size_t i = 0;
+		const size_t end = source.length();
+		string currentToken;
 
-			currentToken.push_back(c);
-			tokenType = Token_Alpha;
-		}
-		else if (isdigit(c) || c == '.' || c == '-')
+		enum
 		{
-			// If building an alpha token, end it
-			if (tokenType == Token_Alpha)
-			{
-				Result.push_back(currentToken);
-				currentToken.clear();
-			}
+			Token_None = 0,
+			Token_Alpha = 1,
+			Token_Numeric = 2,
+		};
+		int tokenType = Token_None;
 
-			currentToken.push_back(c);
-			tokenType = Token_Numeric;
-		}
-		else if (c == '/')
+		while (i < end)
 		{
-			if (next == '/')
+			const char c = source[i];
+			const char next = (i + 1 < end ? source[i+1] : '\0');
+
+			if (isspace(c))
 			{
-				// This is a comment, skip to the end of the line
-				while (source[i] != '\n')
+				// Skip whitespace, end current token
+				if (currentToken.length() != 0)
 				{
-					i ++;
+					Result.push_back(currentToken);
+					currentToken.clear();
+					tokenType = Token_None;
 				}
-				// What about carriage returns? They will be skipped as whitespace
 			}
-		}
-		else if (isprint(c))
-		{
-			// Some symbol, end current token
-			if (currentToken.length() != 0)
+			else if (isalpha(c) || c == '_')
 			{
-				Result.push_back(currentToken);
-				currentToken.clear();
-				tokenType = Token_None;
+				// If building a numeric token, end it
+				if (tokenType == Token_Numeric)
+				{
+					Result.push_back(currentToken);
+					currentToken.clear();
+				}
+
+				currentToken.push_back(c);
+				tokenType = Token_Alpha;
+			}
+			else if (isdigit(c) || c == '.' || c == '-')
+			{
+				// If building an alpha token, end it
+				if (tokenType == Token_Alpha)
+				{
+					Result.push_back(currentToken);
+					currentToken.clear();
+				}
+
+				currentToken.push_back(c);
+				tokenType = Token_Numeric;
+			}
+			else if (c == '/')
+			{
+				if (next == '/')
+				{
+					// This is a comment, skip to the end of the line
+					while (source[i] != '\n')
+					{
+						i ++;
+					}
+					// What about carriage returns? They will be skipped as whitespace
+				}
+			}
+			else if (isprint(c))
+			{
+				// Some symbol, end current token
+				if (currentToken.length() != 0)
+				{
+					Result.push_back(currentToken);
+					currentToken.clear();
+					tokenType = Token_None;
+				}
+
+				// Pass the symbol as a token itself
+				Result.push_back(string(1, c));
+			}
+			else
+			{
+				// Non-printing character, end current token
+				if (currentToken.length() != 0)
+				{
+					Result.push_back(currentToken);
+					currentToken.clear();
+					tokenType = Token_None;
+				}
 			}
 
-			// Pass the symbol as a token itself
-			Result.push_back(string(1, c));
-		}
-		else
-		{
-			// Non-printing character, end current token
-			if (currentToken.length() != 0)
-			{
-				Result.push_back(currentToken);
-				currentToken.clear();
-				tokenType = Token_None;
-			}
+			i ++;
 		}
 
-		i ++;
+		// Add the final token
+		if (currentToken.length() > 0)
+		{
+			Result.push_back(currentToken);
+		}
+
+		return Result;
 	}
 
-	// Add the final token
-	if (currentToken.length() > 0)
-	{
-		Result.push_back(currentToken);
-	}
-
-	return Result;
 }

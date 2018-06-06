@@ -11,106 +11,110 @@
 #include "TokenStream.hpp"
 
 
-struct vec3
+namespace parser
 {
-	float x = 0, y = 0, z = 0;
-};
 
-struct vec4
-{
-	float x = 0, y = 0, z = 0, w = 0;
-};
-
-struct Finish
-{
-	float ambient = 0;
-	float diffuse = 0;
-	float specular = 0;
-
-	float roughness = 1;
-	float reflection = 0;
-	float ior = 1;
-};
-
-struct Transform
-{
-	enum class Type
+	struct vec3
 	{
-		Translate,
-		Scale,
-		Rotate
+		float x = 0, y = 0, z = 0;
 	};
 
-	vec3 quantity;
-	Type type;
-};
-
-struct Attributes
-{
-	vec4 pigment;
-	Finish finish;
-	std::vector<Transform> transforms;
-};
-
-struct Object
-{
-	enum class Type
+	struct vec4
 	{
-		Sphere,
-		Plane,
-		Triangle,
-		Box,
-		Cone
+		float x = 0, y = 0, z = 0, w = 0;
 	};
 
-	Type type;
-	vec3 v1, v2, v3;
-	float s1 = 0, s2 = 0;
-	Attributes attributes;
-};
+	struct Finish
+	{
+		float ambient = 0;
+		float diffuse = 0;
+		float specular = 0;
 
-struct Camera
-{
-	vec3 up, right, look_at, location;
-};
+		float roughness = 1;
+		float reflection = 0;
+		float ior = 1;
+	};
 
-struct Light
-{
-	vec3 position;
-	vec4 color;
-};
+	struct Transform
+	{
+		enum class Type
+		{
+			Translate,
+			Scale,
+			Rotate
+		};
 
+		vec3 quantity;
+		Type type;
+	};
 
-/// Takes a TokenStream and parses the entire file, filling the
-/// camera, lights, and objects fields with the scene information.
-///
-/// Any malformed or unexpected contents in the .pov file is likely
-/// to throw an exception.
-class Parser
-{
+	struct Attributes
+	{
+		vec4 pigment;
+		Finish finish;
+		std::vector<Transform> transforms;
+	};
 
-public:
+	struct Object
+	{
+		enum class Type
+		{
+			Sphere,
+			Plane,
+			Triangle,
+			Box,
+			Cone
+		};
 
-	void Parse(TokenStream & tokens);
+		Type type;
+		vec3 v1, v2, v3;
+		float s1 = 0, s2 = 0;
+		Attributes attributes;
+	};
 
-	Camera camera;
-	std::vector<Light> lights;
-	std::vector<Object> objects;
+	struct Camera
+	{
+		vec3 up, right, look_at, location;
+	};
 
-	static vec3 ParseVector3(TokenStream & tokens);
-	static vec4 ParseVector4(TokenStream & tokens);
-	static vec4 ParseColor(TokenStream & tokens);
-	static vec4 ParsePigment(TokenStream & tokens);
-	static Finish ParseFinish(TokenStream & tokens);
-	static Attributes ParseAttributes(TokenStream & tokens);
+	struct Light
+	{
+		vec3 position;
+		vec4 color;
+	};
 
-	static Camera ParseCamera(TokenStream & tokens);
-	static Light ParseLightSource(TokenStream & tokens);
+	/// Takes a TokenStream and parses the entire file, filling the
+	/// camera, lights, and objects fields with the scene information.
+	///
+	/// Any malformed or unexpected contents in the .pov file is likely
+	/// to throw an exception.
+	class Parser
+	{
 
-	static Object ParseSphere(TokenStream & tokens);
-	static Object ParsePlane(TokenStream & tokens);
-	static Object ParseTriangle(TokenStream & tokens);
-	static Object ParseBox(TokenStream & tokens);
-	static Object ParseCone(TokenStream & tokens);
+	public:
 
-};
+		void Parse(TokenStream & tokens);
+
+		Camera camera;
+		std::vector<Light> lights;
+		std::vector<Object> objects;
+
+		static vec3 ParseVector3(TokenStream & tokens);
+		static vec4 ParseVector4(TokenStream & tokens);
+		static vec4 ParseColor(TokenStream & tokens);
+		static vec4 ParsePigment(TokenStream & tokens);
+		static Finish ParseFinish(TokenStream & tokens);
+		static Attributes ParseAttributes(TokenStream & tokens);
+
+		static Camera ParseCamera(TokenStream & tokens);
+		static Light ParseLightSource(TokenStream & tokens);
+
+		static Object ParseSphere(TokenStream & tokens);
+		static Object ParsePlane(TokenStream & tokens);
+		static Object ParseTriangle(TokenStream & tokens);
+		static Object ParseBox(TokenStream & tokens);
+		static Object ParseCone(TokenStream & tokens);
+
+	};
+
+}

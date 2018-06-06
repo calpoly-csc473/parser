@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iomanip>
 using namespace std;
+using namespace parser;
 
 
 void SceneInfo(const Parser & p);

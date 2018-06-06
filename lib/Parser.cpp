@@ -5,319 +5,325 @@
 
 #include "Parser.hpp"
 #include "parse_error.hpp"
+
 #include <sstream>
 
 using namespace std;
 
 
-void Parser::Parse(TokenStream & tokens)
+namespace parser
 {
-	while (! tokens.empty())
-	{
-		const string token = tokens.pop();
 
-		if (token == "camera")
+	void Parser::Parse(TokenStream & tokens)
+	{
+		while (! tokens.empty())
 		{
-			camera = ParseCamera(tokens);
+			const string token = tokens.pop();
+
+			if (token == "camera")
+			{
+				camera = ParseCamera(tokens);
+			}
+			else if (token == "light_source")
+			{
+				lights.push_back(ParseLightSource(tokens));
+			}
+			else if (token == "sphere")
+			{
+				objects.push_back(ParseSphere(tokens));
+			}
+			else if (token == "triangle")
+			{
+				objects.push_back(ParseTriangle(tokens));
+			}
+			else if (token == "box")
+			{
+				objects.push_back(ParseBox(tokens));
+			}
+			else if (token == "cone")
+			{
+				objects.push_back(ParseCone(tokens));
+			}
+			else if (token == "plane")
+			{
+				objects.push_back(ParsePlane(tokens));
+			}
+			else
+			{
+				throw parse_error("unexpected top-level object", token);
+			}
 		}
-		else if (token == "light_source")
+	}
+
+	vec3 Parser::ParseVector3(TokenStream & tokens)
+	{
+		vec3 v;
+		tokens.require("<");
+		v.x = tokens.pop_numeric();
+		tokens.require(",");
+		v.y = tokens.pop_numeric();
+		tokens.require(",");
+		v.z = tokens.pop_numeric();
+		tokens.require(">");
+		return v;
+	}
+
+	vec4 Parser::ParseVector4(TokenStream & tokens)
+	{
+		vec4 v;
+		tokens.require("<");
+		v.x = tokens.pop_numeric();
+		tokens.require(",");
+		v.y = tokens.pop_numeric();
+		tokens.require(",");
+		v.z = tokens.pop_numeric();
+		tokens.require(",");
+		v.w = tokens.pop_numeric();
+		tokens.require(">");
+		return v;
+	}
+
+
+	vec4 Parser::ParseColor(TokenStream & tokens)
+	{
+		vec4 color;
+
+		tokens.require("color");
+		string type = tokens.pop();
+
+		if (type == "rgb")
 		{
-			lights.push_back(ParseLightSource(tokens));
+			vec3 v = ParseVector3(tokens);
+			color.x = v.x;
+			color.y = v.y;
+			color.z = v.z;
 		}
-		else if (token == "sphere")
+		else if (type == "rgbf")
 		{
-			objects.push_back(ParseSphere(tokens));
-		}
-		else if (token == "triangle")
-		{
-			objects.push_back(ParseTriangle(tokens));
-		}
-		else if (token == "box")
-		{
-			objects.push_back(ParseBox(tokens));
-		}
-		else if (token == "cone")
-		{
-			objects.push_back(ParseCone(tokens));
-		}
-		else if (token == "plane")
-		{
-			objects.push_back(ParsePlane(tokens));
+			color = ParseVector4(tokens);
 		}
 		else
 		{
-			throw parse_error("unexpected top-level object", token);
+			throw parse_error("unexpected color type", type);
 		}
+
+		return color;
 	}
-}
 
-vec3 Parser::ParseVector3(TokenStream & tokens)
-{
-	vec3 v;
-	tokens.require("<");
-	v.x = tokens.pop_numeric();
-	tokens.require(",");
-	v.y = tokens.pop_numeric();
-	tokens.require(",");
-	v.z = tokens.pop_numeric();
-	tokens.require(">");
-	return v;
-}
-
-vec4 Parser::ParseVector4(TokenStream & tokens)
-{
-	vec4 v;
-	tokens.require("<");
-	v.x = tokens.pop_numeric();
-	tokens.require(",");
-	v.y = tokens.pop_numeric();
-	tokens.require(",");
-	v.z = tokens.pop_numeric();
-	tokens.require(",");
-	v.w = tokens.pop_numeric();
-	tokens.require(">");
-	return v;
-}
-
-
-vec4 Parser::ParseColor(TokenStream & tokens)
-{
-	vec4 color;
-
-	tokens.require("color");
-	string type = tokens.pop();
-
-	if (type == "rgb")
+	vec4 Parser::ParsePigment(TokenStream & tokens)
 	{
-		vec3 v = ParseVector3(tokens);
-		color.x = v.x;
-		color.y = v.y;
-		color.z = v.z;
+		vec4 pigment;
+
+		tokens.require("{");
+		pigment = ParseColor(tokens);
+		tokens.require("}");
+
+		return pigment;
 	}
-	else if (type == "rgbf")
+
+	Finish Parser::ParseFinish(TokenStream & tokens)
 	{
-		color = ParseVector4(tokens);
+		Finish f;
+
+		tokens.require("{");
+
+		while (! tokens.empty())
+		{
+			string token = tokens.pop();
+
+			if (token == "ambient")
+				f.ambient = tokens.pop_numeric();
+			else if (token == "diffuse")
+				f.diffuse = tokens.pop_numeric();
+			else if (token == "specular")
+				f.specular = tokens.pop_numeric();
+			else if (token == "roughness")
+				f.roughness = tokens.pop_numeric();
+			else if (token == "ior")
+				f.ior = tokens.pop_numeric();
+			else if (token == "reflection")
+				f.reflection = tokens.pop_numeric();
+			else if (token == "refraction")
+				tokens.pop_numeric();
+			else if (token == "}")
+				break;
+			else
+				throw parse_error("unexpected finish property", token);
+		}
+
+		return f;
 	}
-	else
+
+	Attributes Parser::ParseAttributes(TokenStream & tokens)
 	{
-		throw parse_error("unexpected color type", type);
+		Attributes a;
+
+		while (! tokens.empty())
+		{
+			string token = tokens.pop();
+
+			if (token == "pigment")
+			{
+				a.pigment = ParsePigment(tokens);
+			}
+			else if (token == "finish")
+			{
+				a.finish = ParseFinish(tokens);
+			}
+			else if (token == "translate")
+			{
+				Transform t;
+				t.quantity = ParseVector3(tokens);
+				t.type = Transform::Type::Translate;
+				a.transforms.push_back(t);
+			}
+			else if (token == "rotate")
+			{
+				Transform t;
+				t.quantity = ParseVector3(tokens);
+				t.type = Transform::Type::Rotate;
+				a.transforms.push_back(t);
+			}
+			else if (token == "scale")
+			{
+				Transform t;
+				t.quantity = ParseVector3(tokens);
+				t.type = Transform::Type::Scale;
+				a.transforms.push_back(t);
+			}
+			else if (token == "}")
+			{
+				break;
+			}
+			else
+			{
+				throw parse_error("unexpected object attribute", token);
+			}
+		}
+
+		return a;
 	}
 
-	return color;
-}
 
-vec4 Parser::ParsePigment(TokenStream & tokens)
-{
-	vec4 pigment;
-
-	tokens.require("{");
-	pigment = ParseColor(tokens);
-	tokens.require("}");
-
-	return pigment;
-}
-
-Finish Parser::ParseFinish(TokenStream & tokens)
-{
-	Finish f;
-
-	tokens.require("{");
-
-	while (! tokens.empty())
+	Camera Parser::ParseCamera(TokenStream & tokens)
 	{
-		string token = tokens.pop();
+		Camera c;
 
-		if (token == "ambient")
-			f.ambient = tokens.pop_numeric();
-		else if (token == "diffuse")
-			f.diffuse = tokens.pop_numeric();
-		else if (token == "specular")
-			f.specular = tokens.pop_numeric();
-		else if (token == "roughness")
-			f.roughness = tokens.pop_numeric();
-		else if (token == "ior")
-			f.ior = tokens.pop_numeric();
-		else if (token == "reflection")
-			f.reflection = tokens.pop_numeric();
-		else if (token == "refraction")
-			tokens.pop_numeric();
-		else if (token == "}")
-			break;
-		else
-			throw parse_error("unexpected finish property", token);
+		tokens.require("{");
+
+		while (! tokens.empty())
+		{
+			string token = tokens.pop();
+
+			if (token == "location")
+				c.location = ParseVector3(tokens);
+			else if (token == "look_at")
+				c.look_at = ParseVector3(tokens);
+			else if (token == "up")
+				c.up = ParseVector3(tokens);
+			else if (token == "right")
+				c.right = ParseVector3(tokens);
+			else if (token == "}")
+				break;
+			else
+				throw parse_error("unexpected camera attribute", token);
+		}
+
+		return c;
 	}
 
-	return f;
-}
-
-Attributes Parser::ParseAttributes(TokenStream & tokens)
-{
-	Attributes a;
-
-	while (! tokens.empty())
+	Light Parser::ParseLightSource(TokenStream & tokens)
 	{
-		string token = tokens.pop();
+		Light l;
 
-		if (token == "pigment")
-		{
-			a.pigment = ParsePigment(tokens);
-		}
-		else if (token == "finish")
-		{
-			a.finish = ParseFinish(tokens);
-		}
-		else if (token == "translate")
-		{
-			Transform t;
-			t.quantity = ParseVector3(tokens);
-			t.type = Transform::Type::Translate;
-			a.transforms.push_back(t);
-		}
-		else if (token == "rotate")
-		{
-			Transform t;
-			t.quantity = ParseVector3(tokens);
-			t.type = Transform::Type::Rotate;
-			a.transforms.push_back(t);
-		}
-		else if (token == "scale")
-		{
-			Transform t;
-			t.quantity = ParseVector3(tokens);
-			t.type = Transform::Type::Scale;
-			a.transforms.push_back(t);
-		}
-		else if (token == "}")
-		{
-			break;
-		}
-		else
-		{
-			throw parse_error("unexpected object attribute", token);
-		}
+		tokens.require("{");
+		l.position = ParseVector3(tokens);
+		l.color = ParseColor(tokens);
+		tokens.require("}");
+
+		return l;
 	}
 
-	return a;
-}
 
-
-Camera Parser::ParseCamera(TokenStream & tokens)
-{
-	Camera c;
-
-	tokens.require("{");
-
-	while (! tokens.empty())
+	Object Parser::ParseSphere(TokenStream & tokens)
 	{
-		string token = tokens.pop();
+		Object s;
+		s.type = Object::Type::Sphere;
 
-		if (token == "location")
-			c.location = ParseVector3(tokens);
-		else if (token == "look_at")
-			c.look_at = ParseVector3(tokens);
-		else if (token == "up")
-			c.up = ParseVector3(tokens);
-		else if (token == "right")
-			c.right = ParseVector3(tokens);
-		else if (token == "}")
-			break;
-		else
-			throw parse_error("unexpected camera attribute", token);
+		tokens.require("{");
+		s.v1 = ParseVector3(tokens);
+		tokens.require(",");
+		s.s1 = tokens.pop_numeric();
+
+		s.attributes = ParseAttributes(tokens);
+
+		return s;
 	}
 
-	return c;
-}
+	Object Parser::ParsePlane(TokenStream & tokens)
+	{
+		Object p;
+		p.type = Object::Type::Plane;
 
-Light Parser::ParseLightSource(TokenStream & tokens)
-{
-	Light l;
+		tokens.require("{");
+		p.v1 = ParseVector3(tokens);
+		tokens.require(",");
+		p.s1 = tokens.pop_numeric();
 
-	tokens.require("{");
-	l.position = ParseVector3(tokens);
-	l.color = ParseColor(tokens);
-	tokens.require("}");
+		p.attributes = ParseAttributes(tokens);
 
-	return l;
-}
+		return p;
+	}
 
+	Object Parser::ParseTriangle(TokenStream & tokens)
+	{
+		Object t;
+		t.type = Object::Type::Triangle;
 
-Object Parser::ParseSphere(TokenStream & tokens)
-{
-	Object s;
-	s.type = Object::Type::Sphere;
+		tokens.require("{");
+		t.v1 = ParseVector3(tokens);
+		tokens.require(",");
+		t.v2 = ParseVector3(tokens);
+		tokens.require(",");
+		t.v3 = ParseVector3(tokens);
 
-	tokens.require("{");
-	s.v1 = ParseVector3(tokens);
-	tokens.require(",");
-	s.s1 = tokens.pop_numeric();
+		t.attributes = ParseAttributes(tokens);
 
-	s.attributes = ParseAttributes(tokens);
+		return t;
+	}
 
-	return s;
-}
+	Object Parser::ParseBox(TokenStream & tokens)
+	{
+		Object b;
+		b.type = Object::Type::Box;
 
-Object Parser::ParsePlane(TokenStream & tokens)
-{
-	Object p;
-	p.type = Object::Type::Plane;
+		tokens.require("{");
+		b.v1 = ParseVector3(tokens);
+		tokens.require(",");
+		b.v2 = ParseVector3(tokens);
 
-	tokens.require("{");
-	p.v1 = ParseVector3(tokens);
-	tokens.require(",");
-	p.s1 = tokens.pop_numeric();
+		b.attributes = ParseAttributes(tokens);
 
-	p.attributes = ParseAttributes(tokens);
+		return b;
+	}
 
-	return p;
-}
+	Object Parser::ParseCone(TokenStream & tokens)
+	{
+		Object c;
+		c.type = Object::Type::Cone;
 
-Object Parser::ParseTriangle(TokenStream & tokens)
-{
-	Object t;
-	t.type = Object::Type::Triangle;
+		tokens.require("{");
+		c.v1 = ParseVector3(tokens);
+		tokens.require(",");
+		c.s1 = tokens.pop_numeric();
+		tokens.require(",");
+		c.v2 = ParseVector3(tokens);
+		tokens.require(",");
+		c.s2 = tokens.pop_numeric();
 
-	tokens.require("{");
-	t.v1 = ParseVector3(tokens);
-	tokens.require(",");
-	t.v2 = ParseVector3(tokens);
-	tokens.require(",");
-	t.v3 = ParseVector3(tokens);
+		c.attributes = ParseAttributes(tokens);
 
-	t.attributes = ParseAttributes(tokens);
+		return c;
+	}
 
-	return t;
-}
-
-Object Parser::ParseBox(TokenStream & tokens)
-{
-	Object b;
-	b.type = Object::Type::Box;
-
-	tokens.require("{");
-	b.v1 = ParseVector3(tokens);
-	tokens.require(",");
-	b.v2 = ParseVector3(tokens);
-
-	b.attributes = ParseAttributes(tokens);
-
-	return b;
-}
-
-Object Parser::ParseCone(TokenStream & tokens)
-{
-	Object c;
-	c.type = Object::Type::Cone;
-
-	tokens.require("{");
-	c.v1 = ParseVector3(tokens);
-	tokens.require(",");
-	c.s1 = tokens.pop_numeric();
-	tokens.require(",");
-	c.v2 = ParseVector3(tokens);
-	tokens.require(",");
-	c.s2 = tokens.pop_numeric();
-
-	c.attributes = ParseAttributes(tokens);
-
-	return c;
 }
