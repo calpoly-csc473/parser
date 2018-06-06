@@ -18,6 +18,7 @@ set(HEADERS
 	lib/parse_error.hpp
 	lib/Tokenizer.hpp
 	lib/TokenStream.hpp
+	lib/Objects.hpp
 	lib/Parser.hpp
 )
 
