@@ -23,28 +23,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	ifstream File;
-	File.open(argv[1]);
-
-	if (! File.is_open())
-	{
-		cerr << "Failed to open file '" << argv[1] << "'\n" << endl;
-		return 2;
-	}
-
-	string Contents{istreambuf_iterator<char>(File), istreambuf_iterator<char>()}; // inefficient
-
 	Parser p;
-
-	try
-	{
-		TokenStream ts = Tokenizer::Tokenize(Contents);
-		p.Parse(ts);
-	}
-	catch (const std::exception & e)
-	{
-		cerr << "exception: " << e.what() << endl;
-	}
+	p.ReadFile(argv[1]);
 
 	SceneInfo(p);
 
