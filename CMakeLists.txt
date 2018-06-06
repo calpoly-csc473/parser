@@ -23,9 +23,9 @@ set(HEADERS
 
 add_library(parselib ${SOURCES} ${HEADERS})
 
-add_executable(parser src/Main.cpp)
-target_include_directories(parser PUBLIC "lib/")
-target_link_libraries(parser parselib)
+add_executable(sceneinfo src/SceneInfo.cpp)
+target_include_directories(sceneinfo PUBLIC "lib/")
+target_link_libraries(sceneinfo parselib)
 
 add_executable(unit_tests test/Tests.cpp)
 target_include_directories(unit_tests PUBLIC "ext/")
